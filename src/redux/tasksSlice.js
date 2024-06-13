@@ -1,5 +1,6 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createSlice, createSelector } from "@reduxjs/toolkit";
 import { fetchTasks, addTask, deleteTask } from "../redux/tasksOps";
+import { selectTextFilter } from "../redux/filtersSlice";
 
 const slice = createSlice({
   name: "tasks",
@@ -56,5 +57,82 @@ const slice = createSlice({
       });
   },
 });
+
+// це логіка читання стану, вона має знаходитись тут, в слайсі, а використовуємо в компонетах селектори
+// вони також називаєтья "прості селектори"
+export const selectTasks = (state) => state.tasks.items;
+
+export const selectLoading = (state) => state.tasks.loading;
+
+export const selectError = (state) => state.tasks.error;
+// ===================================================================================================
+// є ще складні селектори. Вони Виглядають так:
+
+// export const selectSum = (state) => {
+//   const a = state.tasks.a;
+//   const b = state.task.b;
+//   return a + b;
+// };
+// ===================================================================================================
+// ця функція нижче мемоїзує значення стану, щоб не викликати часто рендеринг компонента. Рендеритись тепер буде тільки тоді, коли зміниться
+//  або selectTasks, або selectTextFilter
+export const selectVisibleTasks = createSelector(
+  [selectTasks, selectTextFilter],
+  (tasks, textFilter) => {
+    console.log(selectVisibleTasks);
+    return tasks.filter((task) =>
+      task.text.toLowerCase().includes(textFilter.toLowerCase())
+    );
+  }
+);
+// мемоїзація виклику лічильника. Він викличеться тільки тоді, коли зміниться масив тасків.
+// Якщо селектор складний - його обов`язково мемоїзувати
+export const selectTaskCount = createSelector([selectTasks], (tasks) => {
+  return tasks.reduce(
+    (acc, task) => {
+      if (task.completed) {
+        acc.completed += 1;
+      } else {
+        acc.active += 1;
+      }
+      return acc;
+    },
+
+    {
+      active: 0,
+      completed: 0,
+    }
+  );
+});
+// ====================================================================================
+
+// export const selectTaskCount = (state) => {
+//   const tasks = selectTasks(state);
+//   return tasks.reduce(
+//     (acc, task) => {
+//       if (task.completed) {
+//         acc.completed += 1;
+//       } else {
+//         acc.active += 1;
+//       }
+//       return acc;
+//     },
+
+//     {
+//       active: 0,
+//       completed: 0,
+//     }
+//   );
+// };
+
+// =====================================================================================================
+// export const selectVisibleTascs = (state) => {
+//   const tasks = selectTasks(state);
+//   const textFilter = selectTextFilter(state);
+
+//   return tasks.filter((task) =>
+//     task.text.toLowerCase().includes(textFilter.loLowerCase())
+//   );
+// };
 
 export default slice.reducer;
