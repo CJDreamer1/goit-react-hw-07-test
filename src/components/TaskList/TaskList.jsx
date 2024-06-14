@@ -1,7 +1,6 @@
 import Task from "../App/Task/Task";
 import { useSelector } from "react-redux";
-import { selectTextFilter } from "../../redux/filtersSlice";
-import { selectTasks, selectVisibleTasks } from "../../redux/tasksSlice";
+import { selectVisibleTasks } from "../../redux/tasksSlice";
 
 export default function TaskList() {
   //   const tasks = useSelector(selectTasks);
