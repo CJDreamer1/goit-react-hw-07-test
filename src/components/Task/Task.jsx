@@ -1,5 +1,5 @@
 import { useDispatch } from "react-redux";
-import { deleteTask } from "../../../redux/tasksOps";
+import { deleteTask } from "../../redux/tasksOps";
 
 export default function Task({ task }) {
   const dispatch = useDispatch();
