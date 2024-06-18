@@ -3,13 +3,20 @@ import axios from "axios";
 
 axios.defaults.baseURL = "https://goit-task-manager.herokuapp.com/";
 
+const setAuthHeader = (token) => {
+  axios.defaults.headers.common.Authorization = `Bearer ${token}`;
+};
+const clearAuthHeader = () => {
+  axios.defaults.headers.common.Authorization = "";
+};
+
 export const register = createAsyncThunk(
   "auth/register",
   async (newUser, thunkAPI) => {
     try {
       // res - скорочення від response тобто відповідь з серва
       const res = await axios.post("/users/signup", newUser);
-      axios.defaults.headers.common.Authorization = `Bearer ${res.data.token}`;
+      setAuthHeader(res.data.token);
       return res.data;
     } catch (error) {
       return thunkAPI.rejectWithValue(error.message);
@@ -22,7 +29,7 @@ export const logIn = createAsyncThunk(
   async (userInfo, thunkAPI) => {
     try {
       const res = await axios.post("/users/login", userInfo);
-      axios.defaults.headers.common.Authorization = `Bearer ${res.data.token}`;
+      setAuthHeader(res.data.token);
       return res.data;
     } catch (error) {
       return thunkAPI.rejectWithValue(error.message);
@@ -32,10 +39,26 @@ export const logIn = createAsyncThunk(
 
 export const logOut = createAsyncThunk("auth/logout", async (_, thunkAPI) => {
   try {
-    const res = await axios.post("users/logout");
-    axios.defaults.headers.common.Authorization = "";
-    return res.data;
+    await axios.post("users/logout");
+    clearAuthHeader;
   } catch (error) {
     return thunkAPI.rejectWithValue(error.message);
   }
 });
+
+export const refreshUser = createAsyncThunk(
+  "auth/refresh",
+  async (_, thunkAPI) => {
+    const reduxState = thunkAPI.getState();
+    setAuthHeader(reduxState.auth.token);
+
+    const res = await axios.get("users/me");
+    return res.data;
+  },
+  {
+    condition(_, thunkAPI) {
+      const reduxState = thunkAPI.getState();
+      return reduxState.auth.token !== null;
+    },
+  }
+);

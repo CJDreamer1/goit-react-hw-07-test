@@ -1,6 +1,7 @@
 import { createSlice, createSelector } from "@reduxjs/toolkit";
 import { fetchTasks, addTask, deleteTask } from "../redux/tasksOps";
 import { selectTextFilter } from "../redux/filtersSlice";
+import logOut from "../auth/operations";
 
 const taskSlice = createSlice({
   name: "tasks",
@@ -54,6 +55,11 @@ const taskSlice = createSlice({
       .addCase(deleteTask.rejected, (state) => {
         state.loading = false;
         state.error = true;
+      })
+      .addCase(logOut.fulfilled, (state) => {
+        state.items = [];
+        state.isLoading = false;
+        state.error = null;
       });
   },
 });
@@ -104,35 +110,5 @@ export const selectTaskCount = createSelector([selectTasks], (tasks) => {
     }
   );
 });
-// ====================================================================================
-
-// export const selectTaskCount = (state) => {
-//   const tasks = selectTasks(state);
-//   return tasks.reduce(
-//     (acc, task) => {
-//       if (task.completed) {
-//         acc.completed += 1;
-//       } else {
-//         acc.active += 1;
-//       }
-//       return acc;
-//     },
-
-//     {
-//       active: 0,
-//       completed: 0,
-//     }
-//   );
-// };
-
-// =====================================================================================================
-// export const selectVisibleTascs = (state) => {
-//   const tasks = selectTasks(state);
-//   const textFilter = selectTextFilter(state);
-
-//   return tasks.filter((task) =>
-//     task.text.toLowerCase().includes(textFilter.loLowerCase())
-//   );
-// };
 
 export default taskSlice.reducer;
