@@ -1,5 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { register, logIn, logOut } from "../auth/operations";
+import { refreshUser } from "../auth/operations";
 
 const authSlice = createSlice({
   name: "auth",
@@ -11,6 +12,7 @@ const authSlice = createSlice({
     token: null,
     isLoggedIn: false,
     isLoading: false,
+    isRefreshing: false,
   },
   extraReducers: (builder) =>
     builder
@@ -37,10 +39,14 @@ const authSlice = createSlice({
         state.token = null;
         state.isLoggedIn = false;
       })
-      .addCase(refreshUser.pending, (state) => {})
+      .addCase(refreshUser.pending, (state) => {
+        // Допоки state.isRefreshing =  true не малюватииметься інтерфейс
+        state.isRefreshing = true;
+      })
       .addCase(refreshUser.fulfilled, (state, action) => {
         state.user = action.payload;
         state.isLoggedIn = true;
+        state.isRefreshing = false;
       }),
 });
 
